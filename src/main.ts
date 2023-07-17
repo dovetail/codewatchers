@@ -28,35 +28,26 @@ async function run(): Promise<void> {
     const watchersForChangedFiles = changedFiles.data.flatMap(file =>
       watchers.getOwner(file.filename)
     )
-    const uniqueWatchers = new Set(watchersForChangedFiles)
-    core.debug(`Filtered watchers: ${JSON.stringify([...uniqueWatchers])}`)
+    const uniqueWatchers = [...new Set(watchersForChangedFiles)]
+    core.debug(`Filtered watchers: ${JSON.stringify(uniqueWatchers)}`)
 
     // Set assignees
-    const assignees = await octokit.rest.issues.listAssignees({
-      ...github.context.repo,
-      issue_number: github.context.issue.number,
-      per_page: 100
-    })
-    core.debug(
-      `Current assignees: ${JSON.stringify(
-        assignees.data.map(assignee => ({
-          username: assignee.login,
-          email: assignee.email
-        }))
-      )}`
+    const mappings = new Map(
+      core
+        .getMultilineInput('github-user-mappings')
+        .map(line => line.split(':') as [string, undefined])
     )
+    core.debug(`Mappings: ${JSON.stringify(Object.fromEntries(mappings))}`)
 
-    const uniqueAssignees = assignees.data.filter(
-      assignee =>
-        (assignee.email != null && uniqueWatchers.has(assignee.email)) ||
-        uniqueWatchers.has(assignee.login)
+    const mappedAssignees = uniqueWatchers.map(
+      watcher => mappings.get(watcher) ?? watcher
     )
-    core.debug(`Filtered assignees: ${JSON.stringify(uniqueAssignees)}`)
+    core.debug(`Mapped assignees: ${JSON.stringify(mappedAssignees)}`)
 
     await octokit.rest.issues.addAssignees({
       ...github.context.repo,
       issue_number: github.context.issue.number,
-      assignees: uniqueAssignees.map(assignee => assignee.login)
+      assignees: mappedAssignees
     })
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)

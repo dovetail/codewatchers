@@ -14,6 +14,7 @@ This action set the assignees on a PR based of a CODEOWNERS file.
 | ----------------------- | ---------------------------------------------------- | -------- |
 | `github-token`          | Auth token with permissions to label PR              | `true`  |
 | `codewatchers-filename` | Filename of codewatchers file. Default: CODEWATCHERS | `false`  |
+| `github-user-mappings`  | Optional user to github user mappings                | `false`  |
 
 ## Usage
 

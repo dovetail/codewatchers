@@ -12,6 +12,9 @@ inputs:
     required: false
     description: 'Filename of codewatchers file.'
     default: 'CODEWATCHERS'
+  github-user-mappings:
+    required: false
+    description: 'Optional list of mappings from codewatchers to github users. Delimited by colon.'
 runs:
   using: 'node16'
   main: 'dist/index.js'
