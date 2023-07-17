@@ -8,6 +8,8 @@ async function run(): Promise<void> {
     core.debug(`Using ${filename} for setting assignees`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
 
     const watchers = new Codeowners(undefined, filename)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    core.debug(`Watchers: ${JSON.stringify((watchers as any).ownerEntries)}`)
 
     const githubToken = core.getInput('github-token', {required: true})
     const octokit = github.getOctokit(githubToken)
@@ -26,7 +28,7 @@ async function run(): Promise<void> {
       watchers.getOwner(file.filename)
     )
     const uniqueWatchers = [...new Set(watchersForChangedFiles)]
-    core.debug(`Watchers: ${JSON.stringify(uniqueWatchers)}`)
+    core.debug(`Filtered watchers: ${JSON.stringify(uniqueWatchers)}`)
 
     // Set assignees
     await octokit.rest.issues.addAssignees({

@@ -51,13 +51,15 @@ function run() {
             const filename = core.getInput('codewatchers-filename');
             core.debug(`Using ${filename} for setting assignees`); // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
             const watchers = new codeowners_1.default(undefined, filename);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            core.debug(`Watchers: ${JSON.stringify(watchers.ownerEntries)}`);
             const githubToken = core.getInput('github-token', { required: true });
             const octokit = github.getOctokit(githubToken);
             const changedFiles = yield octokit.rest.pulls.listFiles(Object.assign(Object.assign({}, github.context.repo), { pull_number: github.context.issue.number }));
             core.debug(`Changed files: ${JSON.stringify(changedFiles.data.map(file => file.filename))}`);
             const watchersForChangedFiles = changedFiles.data.flatMap(file => watchers.getOwner(file.filename));
             const uniqueWatchers = [...new Set(watchersForChangedFiles)];
-            core.debug(`Watchers: ${JSON.stringify(uniqueWatchers)}`);
+            core.debug(`Filtered watchers: ${JSON.stringify(uniqueWatchers)}`);
             // Set assignees
             yield octokit.rest.issues.addAssignees(Object.assign(Object.assign({}, github.context.repo), { issue_number: github.context.issue.number, assignees: uniqueWatchers }));
         }
