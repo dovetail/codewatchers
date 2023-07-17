@@ -48,8 +48,7 @@ const github = __importStar(__nccwpck_require__(5438));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const maybeFilenameOverride = core.getInput('codewatchers-filename');
-            const filename = maybeFilenameOverride !== '' ? maybeFilenameOverride : 'CODEWATCHERS';
+            const filename = core.getInput('codewatchers-filename');
             core.debug(`Using ${filename} for setting assignees`); // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
             const watchers = new codeowners_1.default(undefined, filename);
             const githubToken = core.getInput('github-token', { required: true });
