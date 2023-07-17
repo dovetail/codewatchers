@@ -1,4 +1,4 @@
-name: 'codewatchers'
+name: 'codewatchers-assignees'
 description: 'Set PR assignees based on a CODEOWNERS file'
 author: 'dovetail'
 inputs:
