@@ -16,11 +16,17 @@ async function run(): Promise<void> {
       ...github.context.repo,
       pull_number: github.context.issue.number
     })
+    core.debug(
+      `Changed files: ${JSON.stringify(
+        changedFiles.data.map(file => file.filename)
+      )}`
+    )
 
     const watchersForChangedFiles = changedFiles.data.flatMap(file =>
       watchers.getOwner(file.filename)
     )
     const uniqueWatchers = [...new Set(watchersForChangedFiles)]
+    core.debug(`Watchers: ${JSON.stringify(uniqueWatchers)}`)
 
     // Set assignees
     await octokit.rest.issues.addAssignees({
