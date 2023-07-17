@@ -1,6 +1,9 @@
 name: 'codewatchers-assignees'
 description: 'Set PR assignees based on a CODEOWNERS file'
 author: 'dovetail'
+branding: 
+  icon: 'users'
+  color: 'blue'
 inputs:
   github-token:
     required: true
