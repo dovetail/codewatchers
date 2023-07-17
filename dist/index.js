@@ -55,13 +55,20 @@ function run() {
             core.debug(`Watchers: ${JSON.stringify(watchers.ownerEntries)}`);
             const githubToken = core.getInput('github-token', { required: true });
             const octokit = github.getOctokit(githubToken);
-            const changedFiles = yield octokit.rest.pulls.listFiles(Object.assign(Object.assign({}, github.context.repo), { pull_number: github.context.issue.number }));
+            const changedFiles = yield octokit.rest.pulls.listFiles(Object.assign(Object.assign({}, github.context.repo), { pull_number: github.context.issue.number, per_page: 100 }));
             core.debug(`Changed files: ${JSON.stringify(changedFiles.data.map(file => file.filename))}`);
             const watchersForChangedFiles = changedFiles.data.flatMap(file => watchers.getOwner(file.filename));
-            const uniqueWatchers = [...new Set(watchersForChangedFiles)];
+            const uniqueWatchers = new Set(watchersForChangedFiles);
             core.debug(`Filtered watchers: ${JSON.stringify(uniqueWatchers)}`);
             // Set assignees
-            yield octokit.rest.issues.addAssignees(Object.assign(Object.assign({}, github.context.repo), { issue_number: github.context.issue.number, assignees: uniqueWatchers }));
+            const assignees = yield octokit.rest.issues.listAssignees(Object.assign(Object.assign({}, github.context.repo), { issue_number: github.context.issue.number, per_page: 100 }));
+            core.debug(`Current assignees: ${JSON.stringify(assignees.data.map(assignee => ({
+                username: assignee.login,
+                email: assignee.email
+            })))}`);
+            const uniqueAssignees = assignees.data.filter(assignee => assignee.email != null && uniqueWatchers.has(assignee.email));
+            core.debug(`Filtered assignees: ${JSON.stringify(uniqueAssignees)}`);
+            yield octokit.rest.issues.addAssignees(Object.assign(Object.assign({}, github.context.repo), { issue_number: github.context.issue.number, assignees: uniqueAssignees.map(assignee => assignee.login) }));
         }
         catch (error) {
             if (error instanceof Error)
