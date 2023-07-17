@@ -4,9 +4,7 @@ import * as github from '@actions/github'
 
 async function run(): Promise<void> {
   try {
-    const maybeFilenameOverride = core.getInput('codewatchers-filename')
-    const filename =
-      maybeFilenameOverride !== '' ? maybeFilenameOverride : 'CODEWATCHERS'
+    const filename = core.getInput('codewatchers-filename')
     core.debug(`Using ${filename} for setting assignees`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
 
     const watchers = new Codeowners(undefined, filename)
