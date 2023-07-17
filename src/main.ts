@@ -29,7 +29,7 @@ async function run(): Promise<void> {
       watchers.getOwner(file.filename)
     )
     const uniqueWatchers = new Set(watchersForChangedFiles)
-    core.debug(`Filtered watchers: ${JSON.stringify(uniqueWatchers)}`)
+    core.debug(`Filtered watchers: ${JSON.stringify([...uniqueWatchers])}`)
 
     // Set assignees
     const assignees = await octokit.rest.issues.listAssignees({
@@ -47,7 +47,9 @@ async function run(): Promise<void> {
     )
 
     const uniqueAssignees = assignees.data.filter(
-      assignee => assignee.email != null && uniqueWatchers.has(assignee.email)
+      assignee =>
+        (assignee.email != null && uniqueWatchers.has(assignee.email)) ||
+        uniqueWatchers.has(assignee.login)
     )
     core.debug(`Filtered assignees: ${JSON.stringify(uniqueAssignees)}`)
 

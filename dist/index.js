@@ -59,14 +59,15 @@ function run() {
             core.debug(`Changed files: ${JSON.stringify(changedFiles.data.map(file => file.filename))}`);
             const watchersForChangedFiles = changedFiles.data.flatMap(file => watchers.getOwner(file.filename));
             const uniqueWatchers = new Set(watchersForChangedFiles);
-            core.debug(`Filtered watchers: ${JSON.stringify(uniqueWatchers)}`);
+            core.debug(`Filtered watchers: ${JSON.stringify([...uniqueWatchers])}`);
             // Set assignees
             const assignees = yield octokit.rest.issues.listAssignees(Object.assign(Object.assign({}, github.context.repo), { issue_number: github.context.issue.number, per_page: 100 }));
             core.debug(`Current assignees: ${JSON.stringify(assignees.data.map(assignee => ({
                 username: assignee.login,
                 email: assignee.email
             })))}`);
-            const uniqueAssignees = assignees.data.filter(assignee => assignee.email != null && uniqueWatchers.has(assignee.email));
+            const uniqueAssignees = assignees.data.filter(assignee => (assignee.email != null && uniqueWatchers.has(assignee.email)) ||
+                uniqueWatchers.has(assignee.login));
             core.debug(`Filtered assignees: ${JSON.stringify(uniqueAssignees)}`);
             yield octokit.rest.issues.addAssignees(Object.assign(Object.assign({}, github.context.repo), { issue_number: github.context.issue.number, assignees: uniqueAssignees.map(assignee => assignee.login) }));
         }
